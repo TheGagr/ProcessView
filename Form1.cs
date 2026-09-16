@@ -21,8 +21,8 @@ namespace ProcessView
             Height = 600;
 
             btnRefresh.Text = "Обновить";
-            btnRefresh.Left = 10;
-            btnRefresh.Top = 10;
+            btnRefresh.Left = 5;
+            btnRefresh.Top = 5;
             btnRefresh.Width = 100;
 
             lstProcesses.Left = 10;
@@ -48,6 +48,8 @@ namespace ProcessView
             Controls.Add(lstThreads);
 
             lstProcesses.SelectedIndexChanged += LstProcesses_SelectedIndexChanged;
+
+            btnRefresh.Click += BtnRefresh_Click;
         }
         private void LoadProcesses()
         {
@@ -83,6 +85,11 @@ namespace ProcessView
             {
                 lstThreads.Items.Add("Нет доступа к потокам этого процесса");
             }
+        }
+
+        private void BtnRefresh_Click(object sender, EventArgs e)
+        {
+            LoadProcesses();
         }
     }
 }
