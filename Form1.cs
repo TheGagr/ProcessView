@@ -7,8 +7,8 @@ namespace ProcessView
     {
         private Button btnRefresh = new Button();
         private ListView lstProcesses = new ListView();
-        private ListBox lstThreads = new ListBox();
-        private Label lblTotal;
+        private ListView lstThreads = new ListView();
+        private Label lblTotal = new Label();
         public Form1()
         {
             InitializeUI();
@@ -25,6 +25,7 @@ namespace ProcessView
             btnRefresh.Left = 5;
             btnRefresh.Top = 5;
             btnRefresh.Width = 100;
+            btnRefresh.Height = 35;
 
             lblTotal = new Label();
             lblTotal.Left = 120;
@@ -46,16 +47,18 @@ namespace ProcessView
             lstProcesses.Columns.Add("Приоритет", 100);
             lstProcesses.Columns.Add("Потоков", 70);
 
+            lstThreads = new ListView();
             lstThreads.Left = 620;
-            lstThreads.Top = 40;
+            lstThreads.Top = 45;
             lstThreads.Width = 250;
             lstThreads.Height = 500;
+            lstThreads.View = View.Details;
+            lstThreads.FullRowSelect = true;
+            lstThreads.GridLines = true;
 
-
-
-            lstProcesses.Items.Add("Text 1");
-
-            lstProcesses.Items.Add("Text 2");
+            lstThreads.Columns.Add("ID", 60);
+            lstThreads.Columns.Add("Приоритет", 80);
+            lstThreads.Columns.Add("Уровень", 100);
 
             LoadProcesses();
 
@@ -63,7 +66,6 @@ namespace ProcessView
             Controls.Add(lstProcesses);
             Controls.Add(lstThreads);
             Controls.Add(lblTotal);
-
 
             lstProcesses.SelectedIndexChanged += LstProcesses_SelectedIndexChanged;
 
@@ -96,7 +98,7 @@ namespace ProcessView
                 }
                 catch
                 {
-                    // Некоторые системные процессы недоступны без прав администратора
+                    
                 }
             }
 
@@ -118,14 +120,18 @@ namespace ProcessView
 
                 foreach (ProcessThread thread in process.Threads)
                 {
-                    lstThreads.Items.Add(
-                        $"ID: {thread.Id}, приоритет: {thread.CurrentPriority}, уровень: {thread.PriorityLevel}"
-                    );
+                    ListViewItem tItem = new ListViewItem(thread.Id.ToString());
+                    tItem.SubItems.Add(thread.CurrentPriority.ToString());
+                    tItem.SubItems.Add(thread.PriorityLevel.ToString());
+                    lstThreads.Items.Add(tItem);
                 }
             }
             catch
             {
-                lstThreads.Items.Add("Нет доступа к потокам этого процесса");
+                ListViewItem errItem = new ListViewItem("—");
+                errItem.SubItems.Add("нет доступа");
+                errItem.SubItems.Add("");
+                lstThreads.Items.Add(errItem);
             }
         }
 
