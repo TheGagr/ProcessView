@@ -78,13 +78,26 @@ namespace ProcessView
 
             foreach (Process process in processes)
             {
-                ListViewItem item = new ListViewItem(process.Id.ToString());
-                item.SubItems.Add(process.ProcessName);
-                lstProcesses.Items.Add(item);
-                double memoryMb = process.WorkingSet64 / 1024.0 / 1024.0;
-                item.SubItems.Add(memoryMb.ToString("F1"));
-                item.SubItems.Add(""); // приоритет
-                item.SubItems.Add(""); // потоков
+                try
+                {
+                    ListViewItem item = new ListViewItem(process.Id.ToString());
+                    item.SubItems.Add(process.ProcessName);
+
+                    double memoryMb = process.WorkingSet64 / 1024.0 / 1024.0;
+                    item.SubItems.Add(memoryMb.ToString("F1"));
+
+                    string priority = $"{process.PriorityClass} ({process.BasePriority})";
+                    item.SubItems.Add(priority);
+
+                    int threadCount = process.Threads.Count;
+                    item.SubItems.Add(threadCount.ToString());
+
+                    lstProcesses.Items.Add(item);
+                }
+                catch
+                {
+                    // Некоторые системные процессы недоступны без прав администратора
+                }
             }
 
         }
