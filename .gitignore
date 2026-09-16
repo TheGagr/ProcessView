@@ -1,0 +1,14 @@
+## Файлы Visual Studio
+.vs/
+*.user
+*.suo
+
+## Результаты сборки
+bin/
+obj/
+Debug/
+Release/
+
+## Прочее
+*.log
+*.tmp
