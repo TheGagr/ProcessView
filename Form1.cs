@@ -6,8 +6,9 @@ namespace ProcessView
     public partial class Form1 : Form
     {
         private Button btnRefresh = new Button();
-        private ListBox lstProcesses = new ListBox();
+        private ListView lstProcesses = new ListView();
         private ListBox lstThreads = new ListBox();
+        private Label lblTotal;
         public Form1()
         {
             InitializeUI();
@@ -25,14 +26,29 @@ namespace ProcessView
             btnRefresh.Top = 5;
             btnRefresh.Width = 100;
 
-            lstProcesses.Left = 10;
-            lstProcesses.Top = 40;
-            lstProcesses.Width = 400;
-            lstProcesses.Height = 500;
+            lblTotal = new Label();
+            lblTotal.Left = 120;
+            lblTotal.Top = 15;
+            lblTotal.AutoSize = true;
+            lblTotal.Text = "Всего процессов: 0";
 
-            lstThreads.Left = 420;
+            lstProcesses.Left = 10;
+            lstProcesses.Top = 45;
+            lstProcesses.Width = 600;
+            lstProcesses.Height = 500;
+            lstProcesses.View = View.Details;
+            lstProcesses.FullRowSelect = true;
+            lstProcesses.GridLines = true;
+
+            lstProcesses.Columns.Add("ID", 60);
+            lstProcesses.Columns.Add("Имя", 200);
+            lstProcesses.Columns.Add("Память (МБ)", 100);
+            lstProcesses.Columns.Add("Приоритет", 100);
+            lstProcesses.Columns.Add("Потоков", 70);
+
+            lstThreads.Left = 620;
             lstThreads.Top = 40;
-            lstThreads.Width = 450;
+            lstThreads.Width = 250;
             lstThreads.Height = 500;
 
 
@@ -46,6 +62,8 @@ namespace ProcessView
             Controls.Add(btnRefresh);
             Controls.Add(lstProcesses);
             Controls.Add(lstThreads);
+            Controls.Add(lblTotal);
+
 
             lstProcesses.SelectedIndexChanged += LstProcesses_SelectedIndexChanged;
 
@@ -55,9 +73,18 @@ namespace ProcessView
         {
             lstProcesses.Items.Clear();
             lstThreads.Items.Clear();
-            foreach (Process process in Process.GetProcesses())
+            Process[] processes = Process.GetProcesses();
+            lblTotal.Text = $"Всего процессов: {processes.Length}";
+
+            foreach (Process process in processes)
             {
-                lstProcesses.Items.Add($"{process.Id} - {process.ProcessName}");
+                ListViewItem item = new ListViewItem(process.Id.ToString());
+                item.SubItems.Add(process.ProcessName);
+                lstProcesses.Items.Add(item);
+                double memoryMb = process.WorkingSet64 / 1024.0 / 1024.0;
+                item.SubItems.Add(memoryMb.ToString("F1"));
+                item.SubItems.Add(""); // приоритет
+                item.SubItems.Add(""); // потоков
             }
 
         }
@@ -65,11 +92,13 @@ namespace ProcessView
         private void LstProcesses_SelectedIndexChanged(object sender, EventArgs e)
         {
             lstThreads.Items.Clear();
-            if (lstProcesses.SelectedItem == null)
+
+            if (lstProcesses.SelectedItems.Count == 0)
                 return;
 
-            string selected = lstProcesses.SelectedItem.ToString();
-            int processId = int.Parse(selected.Split('-')[0].Trim());
+            ListViewItem selected = lstProcesses.SelectedItems[0];
+            int processId = int.Parse(selected.Text);   // Text — первая ячейка, там ID
+
             try
             {
                 Process process = Process.GetProcessById(processId);
